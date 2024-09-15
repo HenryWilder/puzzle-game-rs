@@ -1,6 +1,6 @@
 use raylib::prelude::*;
 
-mod cell;
+mod spacial;
 mod block;
 mod worm;
 

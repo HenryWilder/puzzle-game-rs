@@ -1,5 +1,5 @@
 use std::collections::VecDeque;
-use crate::cell::*;
+use crate::spacial::direction3::Direction3;
 
 #[derive(Debug)]
 pub struct WormSegments(VecDeque<Direction3>);
@@ -73,5 +73,9 @@ impl WormSegments {
             old_direction,
             updated_segments: (!self.0.is_empty()).then_some(self),
         }
+    }
+
+    pub(super) fn iter(&self) -> std::collections::vec_deque::Iter<'_, Direction3> {
+        self.0.iter()
     }
 }

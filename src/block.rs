@@ -1,7 +1,4 @@
-#![warn(missing_docs)]
-#![allow(unused)]
-
-use crate::cell::*;
+use crate::spacial::vector3i::Vector3i;
 
 pub struct Block {
     position: Vector3i,
