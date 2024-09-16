@@ -59,12 +59,12 @@ fn main() {
         // Tick
 
         let crawl_direction = {
-            let input_up    = rl.is_key_pressed(KeyboardKey::KEY_W) || rl.is_key_pressed(KeyboardKey::KEY_UP);
-            let input_down  = rl.is_key_pressed(KeyboardKey::KEY_S) || rl.is_key_pressed(KeyboardKey::KEY_DOWN);
             let input_left  = rl.is_key_pressed(KeyboardKey::KEY_A) || rl.is_key_pressed(KeyboardKey::KEY_LEFT);
             let input_right = rl.is_key_pressed(KeyboardKey::KEY_D) || rl.is_key_pressed(KeyboardKey::KEY_RIGHT);
-            let input_vertical   = (input_up    as isize) - (input_down as isize);
+            let input_up    = rl.is_key_pressed(KeyboardKey::KEY_W) || rl.is_key_pressed(KeyboardKey::KEY_UP);
+            let input_down  = rl.is_key_pressed(KeyboardKey::KEY_S) || rl.is_key_pressed(KeyboardKey::KEY_DOWN);
             let input_horizontal = (input_right as isize) - (input_left as isize);
+            let input_vertical   = (input_up    as isize) - (input_down as isize);
             // horizontal takes priority
             match (input_horizontal, input_vertical) {
                 (    1..,   _  ) => Some(Direction3::East),
@@ -74,6 +74,7 @@ fn main() {
                 (    0,     0  ) => None,
             }
         };
+
         if let Some(direction) = crawl_direction {
             worm.crawl(direction);
         }
