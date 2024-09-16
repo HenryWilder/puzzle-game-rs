@@ -10,10 +10,10 @@ pub struct Worm {
 // Basics
 
 impl Worm {
-    pub fn new(head_position: Vector3i, segments: impl Into<WormSegments>) -> Self {
+    pub fn new<T: IntoIterator<Item = Direction3>>(head_position: Vector3i, segments: T) -> Self {
         Self {
             head_position,
-            segments: Some(segments.into()),
+            segments: Some(WormSegments::from_iter(segments)),
         }
     }
 
@@ -27,6 +27,18 @@ impl Worm {
     /// The worm is just a head with no segments
     pub fn is_tailless(&self) -> bool {
         self.segments.is_none()
+    }
+
+    pub fn head_position(&self) -> Vector3i {
+        self.head_position
+    }
+
+    /// Number of elements returned by [`Self::segment_positions()`]
+    pub fn num_segments(&self) -> usize {
+        match &self.segments {
+            Some(segments) => segments.len() + 1,
+            None => 1,
+        }
     }
 }
 
@@ -42,7 +54,7 @@ impl std::fmt::Debug for LengthenTaillessError<'_> {
 
 impl LengthenTaillessError<'_> {
     pub fn resolve(mut self, direction: Direction3) {
-        self.0.segments = Some(WormSegments::new(direction));
+        self.0.segments = Some(WormSegments::from([direction]));
     }
 }
 
@@ -80,7 +92,7 @@ mod test {
 
         #[test]
         fn test_ok() {
-            let mut worm = Worm::new(Vector3i::new(0, 0, 0), Direction3::North);
+            let mut worm = Worm::new(Vector3i::new(0, 0, 0), [Direction3::North]);
 
             let result = worm.try_lengthen();
             assert!(result.is_ok(), "lengthening existing tail should succeed");
@@ -117,20 +129,22 @@ impl std::fmt::Debug for InvalidDirectionError {
 impl Worm {
     /// Pulls the worm's head in the requested direction without changing the worm's length.
     /// Does not have awareness of the level geometry.
-    pub fn try_crawl(&mut self, crawl_direction: Direction3) -> Result<(), InvalidDirectionError> {
-        if !self.is_tailless() {
-            let new_head_direction = -crawl_direction;
-            let current_head_direction = self.segments.as_ref().unwrap().head_direction();
-            // Cannot crawl into own neck
-            if -current_head_direction == new_head_direction {
-                return Err(InvalidDirectionError {});
-            }
-            let mut segments = std::mem::take(&mut self.segments).unwrap();
-            segments.push_head(new_head_direction);
-            self.segments = segments.pop_tail().updated_segments;
-        }
+    pub fn crawl(&mut self, crawl_direction: Direction3) {
         self.head_position += crawl_direction;
-        Ok(())
+        if !self.is_tailless() {
+            let mut segments = std::mem::take(&mut self.segments).unwrap();
+            let new_head_direction = -crawl_direction;
+            let current_head_direction = segments.head_direction();
+            self.segments = if -current_head_direction != new_head_direction {
+                segments.push_head(new_head_direction);
+                segments.pop_tail().updated_segments
+            } else {
+                // reversing
+                let current_tail_direction = segments.tail_direction();
+                segments.push_tail(current_tail_direction);
+                segments.pop_head().updated_segments
+            };
+        }
     }
 }
 

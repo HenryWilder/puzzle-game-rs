@@ -4,12 +4,23 @@ use crate::spacial::direction3::Direction3;
 #[derive(Debug)]
 pub struct WormSegments(VecDeque<Direction3>);
 
-impl<T> From<T> for WormSegments
-where
-    VecDeque<Direction3>: From<T>
-{
-    fn from(value: T) -> Self {
-        Self(VecDeque::from(value))
+pub(super) struct PopResult {
+    pub old_direction: Direction3,
+    pub updated_segments: Option<WormSegments>,
+}
+
+impl FromIterator<Direction3> for WormSegments {
+    fn from_iter<T: IntoIterator<Item = Direction3>>(iter: T) -> Self {
+        let mut iter = iter.into_iter().peekable();
+        assert!(iter.peek().is_some());
+        Self(iter.collect())
+    }
+}
+
+impl<const N: usize> From<[Direction3; N]> for WormSegments {
+    fn from(value: [Direction3; N]) -> Self {
+        assert_ne!(N, 0);
+        Self(value.into())
     }
 }
 
@@ -19,16 +30,7 @@ impl From<Direction3> for WormSegments {
     }
 }
 
-pub(super) struct PopResult {
-    pub old_direction: Direction3,
-    pub updated_segments: Option<WormSegments>,
-}
-
 impl WormSegments {
-    pub(super) fn new(tail: Direction3) -> Self {
-        Self::from(tail)
-    }
-
     pub fn len(&self) -> usize {
         self.0.len()
     }
