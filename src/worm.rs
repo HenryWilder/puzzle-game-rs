@@ -1,7 +1,10 @@
+//! A worm.
+
 use crate::spacial::{vector3i::Vector3i, direction3::Direction3};
 pub mod segments;
 use segments::*;
 
+/// A worm.
 pub struct Worm {
     head_position: Vector3i,
     segments: Option<WormSegments>,
@@ -10,13 +13,32 @@ pub struct Worm {
 // Basics
 
 impl Worm {
-    pub fn new<T: IntoIterator<Item = Direction3>>(head_position: Vector3i, segments: T) -> Self {
+    /// Construct a worm from head and segments.
+    /// Each segment directs where the tail will go.
+    ///
+    /// Example:
+    /// ```no_run
+    /// use Direction3::*;
+    /// Worm::new(Vector3i::new(0,0,0), [
+    ///     East,
+    ///     South,
+    /// ]);
+    /// ```
+    /// produces the worm
+    /// ```not_rust
+    /// O--.
+    ///    |
+    /// ```
+    pub fn new(head_position: Vector3i, segments: impl IntoIterator<Item = Direction3>) -> Self {
         Self {
             head_position,
             segments: Some(WormSegments::from_iter(segments)),
         }
     }
 
+    /// Constructs a worm from head with no segments.
+    /// If this is the player worm, it will be only a ring.
+    /// If this is an NPC worm, it will be an edible dot.
     pub fn new_tailless(head_position: Vector3i) -> Self {
         Self {
             head_position,
@@ -24,16 +46,18 @@ impl Worm {
         }
     }
 
-    /// The worm is just a head with no segments
+    /// The worm is just a head with no segments?
     pub fn is_tailless(&self) -> bool {
         self.segments.is_none()
     }
 
+    /// The grid position of the head.
+    /// Any other position requires iterating over [`Self::segment_positions()`].
     pub fn head_position(&self) -> Vector3i {
         self.head_position
     }
 
-    /// Number of elements returned by [`Self::segment_positions()`]
+    /// Number of elements returned by [`Self::segment_positions()`].
     pub fn num_segments(&self) -> usize {
         match &self.segments {
             Some(segments) => segments.len() + 1,
@@ -44,6 +68,10 @@ impl Worm {
 
 // Lengthen
 
+/// Calling [`Worm::try_lengthen()`] requires the worm to be at least 1 segment long so the tail can be extended in that direction.
+/// Otherwise, the direction must be specified.
+///
+/// This error can be handled semi-automatically by calling [`Self::resolve()`].
 pub struct LengthenTaillessError<'worm>(&'worm mut Worm);
 
 impl std::fmt::Debug for LengthenTaillessError<'_> {
@@ -53,8 +81,9 @@ impl std::fmt::Debug for LengthenTaillessError<'_> {
 }
 
 impl LengthenTaillessError<'_> {
-    pub fn resolve(mut self, direction: Direction3) {
-        self.0.segments = Some(WormSegments::from([direction]));
+    /// Resolve and consumes the [`LengthenTaillessError`] by specifying the direction in which the tail should grow.
+    pub fn resolve(self, direction: Direction3) {
+        _ = self.0.segments.insert(WormSegments::from([direction]));
     }
 }
 
@@ -63,7 +92,7 @@ impl Worm {
     /// Does not have awareness of the level geometry.
     ///
     /// Example:
-    /// ```no_run
+    /// ```
     /// my_worm
     ///     .try_lengthen()
     ///     .unwrap_or_else(|err| {
@@ -118,14 +147,6 @@ mod test {
 
 // Crawl
 
-pub struct InvalidDirectionError {}
-
-impl std::fmt::Debug for InvalidDirectionError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "worm cannot pass through itself except to create a closed loop")
-    }
-}
-
 impl Worm {
     /// Pulls the worm's head in the requested direction without changing the worm's length.
     /// Does not have awareness of the level geometry.
@@ -151,7 +172,17 @@ impl Worm {
 // Segment Positions
 
 impl Worm {
-    pub fn segment_positions<'worm>(&'worm self) -> impl Iterator<Item = Vector3i> + 'worm {
+    /// Create an iterator over the worm's segments' world positions.
+    /// The first element is always guaranteed to exist and will be the head position itself.
+    ///
+    /// Example
+    /// ```no_run
+    /// let worm: Worm = // ...
+    /// let mut it = worm.segment_positions();
+    /// let head_position = it.next().unwrap();
+    /// let tail_position = it.last();
+    /// ```
+    pub fn segment_positions<'worm>(&'worm self) -> impl 'worm + Iterator<Item = Vector3i> {
         Some(self.head_position)
             .into_iter()
             .chain(self.segments.as_ref()

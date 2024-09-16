@@ -1,6 +1,10 @@
+//! Container adapter for [`crate::worm::Worm`]'s segments.
+//! Code outside of this module should not care what container [`WormSegments`] uses.
+
 use std::collections::VecDeque;
 use crate::spacial::direction3::Direction3;
 
+/// A collection of segments.
 #[derive(Debug)]
 pub struct WormSegments(VecDeque<Direction3>);
 
@@ -31,16 +35,23 @@ impl From<Direction3> for WormSegments {
 }
 
 impl WormSegments {
+    /// The total number of segments in the collection.
     pub fn len(&self) -> usize {
         self.0.len()
     }
 
+    /// The direction of the segment closest to the head.
+    /// This direction is given from the head's perspective.
+    /// i.e. The neck is the head's position offset 1 unit in this direction.
     pub fn head_direction(&self) -> Direction3 {
         *self.0
             .front()
             .expect("WormSegments cannot be empty")
     }
 
+    /// The direction of the tail segment.
+    /// This direction is given from the head's perspective.
+    /// i.e. If the worm backs up, its rear will move in this direction.
     pub fn tail_direction(&self) -> Direction3 {
         *self.0
             .back()

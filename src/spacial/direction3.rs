@@ -1,23 +1,27 @@
+//! A 3D cardinal direction.
+
 use std::{ops::*, cmp::*};
 use super::vector3i::Vector3i;
 
+/// A 3D cardinal direction.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Direction3 {
-    // /// No direction
-    // None =  0b000,
-    /// Positive [`Vector3i::x`]
+    /// Positive [`Vector3i::x`].
     East =  0b100,
-    /// Negative [`Vector3i::x`]
+    /// Negative [`Vector3i::x`].
     West = -0b100,
-    /// Positive [`Vector3i::y`]
+    /// Positive [`Vector3i::y`].
     North =  0b010,
-    /// Negative [`Vector3i::y`]
+    /// Negative [`Vector3i::y`].
     South = -0b010,
-    /// Positive [`Vector3i::z`]
+    /// Positive [`Vector3i::z`].
     Up   =  0b001,
-    /// Negative [`Vector3i::z`]
+    /// Negative [`Vector3i::z`].
     Down = -0b001,
 }
+
+// All Vector3i methods can be converted to Vector3 methods with minimal change
+// But I haven't found a need to do that yet, so eh.
 
 // Direction3 -> Vector3i is trivial.
 // Vector3i -> Direction3 is complicated without enforcing integer normalization.

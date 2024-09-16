@@ -1,14 +1,20 @@
+//! Integer [`raylib::prelude::Vector3`].
+
 use std::{ops::*, cmp::*};
 
 /// 3D grid position.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Vector3i {
+    /// x-coordinate.
     pub x: i32,
+    /// y-coordinate.
     pub y: i32,
+    /// z-coordinate.
     pub z: i32,
 }
 
 impl Vector3i {
+    /// Construct a [`Vector3i`]
     pub fn new(x: i32, y: i32, z: i32) -> Self {
         Self { x, y, z }
     }

@@ -1,5 +1,6 @@
-use crate::spacial::vector3i::Vector3i;
+//! BABA instruction blocks.
 
+/// An instruction block. Adjacent, grammatically valid blocks form rules.
 pub struct Block {
-    position: Vector3i,
+
 }

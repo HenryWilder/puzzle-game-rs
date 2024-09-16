@@ -1,15 +1,23 @@
+//! Puzzle game inspired by *Can of Wormholes* and *BABA IS YOU*.
+
+#![warn(missing_docs)]
+
 use raylib::prelude::*;
 
-mod spacial;
-mod block;
-mod worm;
+pub mod spacial;
+pub mod block;
+pub mod worm;
 use spacial::{direction3::Direction3, vector3i::Vector3i};
 use worm::*;
 
-const CELL_SIZE: f32 = 8.0;
-const VOXEL: Vector3 = Vector3::new(CELL_SIZE, CELL_SIZE, CELL_SIZE);
+/// The sidelength of a cell in the game's grid.
+pub const CELL_SIZE: f32 = 8.0;
 
-fn cell_to_world(cell: Vector3i) -> Vector3 {
+/// [`CELL_SIZE`] as a [`Vector3`].
+pub const VOXEL: Vector3 = Vector3::new(CELL_SIZE, CELL_SIZE, CELL_SIZE);
+
+/// Converts from grid coordinates to world coordinates.
+pub fn cell_to_world(cell: Vector3i) -> Vector3 {
     Vector3::new(
         cell.x as f32 * CELL_SIZE,
         cell.y as f32 * CELL_SIZE,
@@ -17,7 +25,8 @@ fn cell_to_world(cell: Vector3i) -> Vector3 {
     )
 }
 
-fn world_to_cell(position: Vector3) -> Vector3i {
+/// Converts from world coordinates to grid coordinates.
+pub fn world_to_cell(position: Vector3) -> Vector3i {
     const RECIPROCAL_CELL_SIZE: f32 = 1.0 / CELL_SIZE;
     Vector3i::new(
         (position.x * RECIPROCAL_CELL_SIZE).round() as i32,
