@@ -5,7 +5,7 @@
 use raylib::prelude::*;
 
 pub mod spacial;
-pub mod block;
+pub mod rules;
 pub mod worm;
 use spacial::{direction3::Direction3, vector3i::Vector3i};
 use worm::*;
